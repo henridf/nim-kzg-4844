@@ -12,4 +12,68 @@
 {.compile: "../vendor/c-kzg-4844/blst/src/server.c"}
 {.compile: "../vendor/c-kzg-4844/src/c_kzg_4844.c"}
 
-{.passc: "-I/Users/henridf/work/nim-kzg-4844/vendor/c-kzg-4844/blst/bindings".}
+# todo: figure out how to support changing FIELD_ELEMENTS_PER_BLOB
+{.passc: "-I/Users/henridf/work/nim-kzg-4844/vendor/c-kzg-4844/blst/bindings -DFIELD_ELEMENTS_PER_BLOB=4096".}
+
+
+
+const
+  FIELD_ELEMENTS_PER_BLOB* = 4096
+  BYTES_PER_FIELD_ELEMENT* = 32
+
+
+type C_KZG_RET* = cint
+const
+  C_KZG_OK* = (0).C_KZG_RET
+  C_KZG_BADARGS* = (1).C_KZG_RET
+  C_KZG_ERROR* = (2).C_KZG_RET
+  C_KZG_MALLOC* = (3).C_KZG_RET
+
+
+
+type
+  limb_t = uint64
+
+  blst_fr {.byref.} = object
+    l: array[typeof(256)(typeof(256)(256 / typeof(256)(8)) /
+        typeof(256)(sizeof((limb_t)))), limb_t]
+
+  blob_t* {.byref.} = array[FIELD_ELEMENTS_PER_BLOB*BYTES_PER_FIELD_ELEMENT, uint8]
+
+  fr_t = blst_fr
+
+  blst_fp {.byref.} = object
+    l*: array[typeof(384)(typeof(384)(384 / typeof(384)(8)) /
+        typeof(384)(sizeof((limb_t)))), limb_t]
+
+  blst_p1 {.byref.} = object
+    x*: blst_fp
+    y*: blst_fp
+    z*: blst_fp
+
+  g1_t = blst_p1
+
+  KZGCommitment* = g1_t
+
+  KZGProof* = g1_t
+
+  FFTSettings {.byref.} = object
+    max_width: uint64
+    expanded_roots_of_unity: fr_t
+    reverse_roots_of_unity: fr_t
+    roots_of_unity: fr_t
+
+  KZGSettings* {.byref.} = object
+    fs*: ptr FFTSettings
+    g1values*: ptr g1_t
+    g2values*: ptr g1_t
+
+proc load_trusted_setup*(ks: var KZGSettings, inf: File): C_KZG_RET {.cdecl, importc: "load_trusted_setup".}
+
+proc blob_to_kzg_commitment*(kc: var KZGCommitment, blob: blob_t, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "blob_to_kzg_commitment".}
+
+proc compute_aggregate_kzg_proof*(kp: var KZGProof, blobs: ptr blob_t, n: csize_t, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "compute_aggregate_kzg_proof".}
+
+proc verify_aggregate_kzg_proof*(ok: ptr bool, blobs: ptr blob_t, expected_kzg_commitments: ptr KZGCommitment, n: csize_t, proof: KZGProof, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "verify_aggregate_kzg_proof".}
+
+proc verify_kzg_proof*(ok: ptr bool, kc: KZGCommitment, z: array[32, uint8], y: array[32, uint8], proof: KZGPRoof, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "verify_kzg_proof".}

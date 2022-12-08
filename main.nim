@@ -2,15 +2,9 @@ import kzg/kzg_abi
 
 
 proc readSetup(filename: string) : KZGSettings =
-  #  var ks: KZGSettings
   var file = open(filename)
   let ret =  load_trusted_setup(result, file)
-  if ret != C_KZG_OK:
-    return
-
-  echo "fs: ", result.fs[]
-  echo "g1: ", result.g1values[]
-  echo "g2: ", result.g2values[]
+  doAssert ret == C_KZG_OK:
 
 let settings = readSetup("trusted_setup.txt")
 
@@ -41,4 +35,4 @@ echo kp
 
 var ok: bool
 echo verify_aggregate_kzg_proof(addr(ok), addr(blobs[0]), addr(kzgcommits[0]), csize_t(1), kp, settings)
-echo ok
+doAssert ok

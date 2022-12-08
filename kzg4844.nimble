@@ -1,31 +1,33 @@
-# nim-zlib
-# Copyright (c) 2021-2022 Status Research & Development GmbH
-# Licensed under either of
-#  * Apache License, version 2.0, ([LICENSE-APACHE](LICENSE-APACHE))
-#  * MIT license ([LICENSE-MIT](LICENSE-MIT))
-# at your option.
-# This file may not be copied, modified, or distributed except according to
-# those terms.
-
 mode = ScriptMode.Verbose
 
 packageName   = "kzg4844"
 version       = "0.1.0"
 author        = "Henri DF"
-description   = "kzg-4844 wrapper in nim"
+description   = "c-kzg-4844 wrapper in nim"
 license       = "Apache License 2.0"
 skipDirs      = @["tests"]
 
+installDirs = @["kzg4844", "vendor"]
+installFiles = @["kzg4844.nim"]
+
 requires "nim >= 1.2.0"
 
-# Helper functions
-proc test(args, path: string) =
-  if not dirExists "build":
-    mkDir "build"
-  exec "nim " & getEnv("TEST_LANG", "c") & " " & getEnv("NIMFLAGS") & " " & args &
-    " --outdir:build -r -f --hints:off --warnings:off --skipParentCfg " & path
+let nimc = getEnv("NIMC", "nim") # Which nim compiler to use
+let flags = getEnv("NIMFLAGS", "") # Extra flags for the compiler
+let verbose = getEnv("V", "") notin ["", "0"]
 
+let styleCheckStyle = if (NimMajor, NimMinor) < (1, 6): "hint" else: "error"
+let cfg =
+  " --styleCheck:usages --styleCheck:" & styleCheckStyle &
+  (if verbose: "" else: " --verbosity:0 --hints:off") &
+  " --skipParentCfg --skipUserCfg --outdir:build --nimcache:build/nimcache -f"
+
+proc build(args, path: string) =
+  exec nimc & " c " & cfg & " " & flags & " " & args & " " & path
+
+proc run(args, path: string) =
+  build args & " -r", path
+
+### tasks
 task test, "Run all tests":
-  test "-d:debug", "tests/test_all"
-  test "-d:release", "tests/test_all"
-  test "--threads:on -d:release", "tests/test_all"
+  run "", "tests/verify_proof.nim"

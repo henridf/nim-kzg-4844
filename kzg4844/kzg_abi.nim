@@ -7,20 +7,20 @@
 # This file may not be copied, modified, or distributed except according to
 # those terms.
 
+import std/strformat
+
+const FIELD_ELEMENTS_PER_BLOB*{.strdefine.} = 4096
 
 {.compile: "../vendor/c-kzg-4844/blst/build/assembly.S".}
 {.compile: "../vendor/c-kzg-4844/blst/src/server.c"}
 {.compile: "../vendor/c-kzg-4844/src/c_kzg_4844.c"}
 
-# todo: figure out how to support changing FIELD_ELEMENTS_PER_BLOB
-{.passc: "-I/Users/henridf/work/nim-kzg-4844/vendor/c-kzg-4844/blst/bindings -DFIELD_ELEMENTS_PER_BLOB=4096".}
+{.passc: "-I/Users/henridf/work/nim-kzg-4844/vendor/c-kzg-4844/blst/bindings -DFIELD_ELEMENTS_PER_BLOB=" & fmt"{FIELD_ELEMENTS_PER_BLOB}".}
 
 
 
 const
-  FIELD_ELEMENTS_PER_BLOB* = 4096
   BYTES_PER_FIELD_ELEMENT* = 32
-
 
 type C_KZG_RET* = cint
 const
@@ -76,4 +76,4 @@ proc compute_aggregate_kzg_proof*(kp: var KZGProof, blobs: ptr blob_t, n: csize_
 
 proc verify_aggregate_kzg_proof*(ok: ptr bool, blobs: ptr blob_t, expected_kzg_commitments: ptr KZGCommitment, n: csize_t, proof: KZGProof, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "verify_aggregate_kzg_proof".}
 
-proc verify_kzg_proof*(ok: ptr bool, kc: KZGCommitment, z: array[32, uint8], y: array[32, uint8], proof: KZGPRoof, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "verify_kzg_proof".}
+proc verify_kzg_proof*(ok: ptr bool, kc: KZGCommitment, z: array[32, uint8], y: array[32, uint8], proof: KZGProof, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "verify_kzg_proof".}

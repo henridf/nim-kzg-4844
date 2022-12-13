@@ -68,7 +68,7 @@ type
     g1values*: ptr g1_t
     g2values*: ptr g1_t
 
-proc load_trusted_setup*(ks: var KZGSettings, inf: File): C_KZG_RET {.cdecl, importc: "load_trusted_setup".}
+proc load_trusted_setup_file*(ks: var KZGSettings, inf: File): C_KZG_RET {.cdecl, importc: "load_trusted_setup_file".}
 
 proc blob_to_kzg_commitment*(kc: var KZGCommitment, blob: blob_t, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "blob_to_kzg_commitment".}
 

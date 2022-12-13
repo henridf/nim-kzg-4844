@@ -2,9 +2,11 @@ import
   std/[sysrand, unittest],
   ../kzg4844/kzg_abi
 
+const MAX_TOP_BYTE=114
+
 proc readSetup(filename: string) : KZGSettings =
   var file = open(filename)
-  let ret =  load_trusted_setup(result, file)
+  let ret =  load_trusted_setup_file(result, file)
   doAssert ret == C_KZG_OK
 
 let settings = readSetup("tests/trusted_setup.txt")
@@ -16,6 +18,10 @@ proc createBlobsAndCommits(n: int): (seq[blob_t], seq[KZGCommitment]) =
   for i in 0..<n:
     var blob: array[FIELD_ELEMENTS_PER_BLOB*BYTES_PER_FIELD_ELEMENT, uint8]
     discard urandom(blob)
+    for i in 0..<len(blob):
+      # don't overflow modulus
+      if blob[i] > MAX_TOP_BYTE and i %% BYTES_PER_FIELD_ELEMENT == 31:
+        blob[i] = MAX_TOP_BYTE
     blobs.add(blob)
 
   var commits: seq[KZGCommitment]

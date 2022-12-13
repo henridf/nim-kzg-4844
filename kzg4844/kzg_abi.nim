@@ -68,6 +68,11 @@ type
     g1values*: ptr g1_t
     g2values*: ptr g1_t
 
+
+proc bytes_to_g1(res: var g1_t, input: array[48, uint8]): C_KZG_RET  {.cdecl, importc: "bytes_to_g1".}
+
+proc bytes_from_g1(res: var array[48, uint8], input: g1_t) {.cdecl, importc: "bytes_from_g1".}
+
 proc load_trusted_setup_file*(ks: var KZGSettings, inf: File): C_KZG_RET {.cdecl, importc: "load_trusted_setup_file".}
 
 proc blob_to_kzg_commitment*(kc: var KZGCommitment, blob: blob_t, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "blob_to_kzg_commitment".}

@@ -8,8 +8,8 @@
 # those terms.
 
 import
-  kzg/[kzg_abi, kzg]
+  kzg4844/kzg
 
 export
-  kzg_abi, kzg
+  kzg
 

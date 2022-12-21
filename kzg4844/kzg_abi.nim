@@ -51,11 +51,15 @@ type
     y*: blst_fp
     z*: blst_fp
 
-  g1_t = blst_p1
+  g1_t* = blst_p1
 
   KZGCommitment* = g1_t
-
   KZGProof* = g1_t
+
+  # temporary pending c-kzg upgrade
+  KZGCommitmentBytes* = array[48, byte]
+  KZGProofBytes* = array[48, byte]
+
 
   FFTSettings {.byref.} = object
     max_width: uint64
@@ -69,7 +73,7 @@ type
     g2values*: ptr g1_t
 
 
-proc bytes_to_g1(res: var g1_t, input: array[48, uint8]): C_KZG_RET  {.cdecl, importc: "bytes_to_g1".}
+proc bytes_to_g1*(res: var g1_t, input: array[48, uint8]): C_KZG_RET  {.cdecl, importc: "bytes_to_g1".}
 
 proc bytes_from_g1(res: var array[48, uint8], input: g1_t) {.cdecl, importc: "bytes_from_g1".}
 

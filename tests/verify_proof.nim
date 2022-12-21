@@ -66,7 +66,7 @@ suite "verify proof (high-level)":
     doAssert not proofOpt.isNone()
     let proof = proofOpt.get()
 
-    doAssert verify_aggregate_kzg_proof(blobs, commits, proof)
+    doAssert verify_aggregate_kzg_proof_points(blobs, commits, proof)
 
   test "verify proof failure":
     var (blobs, commits) = createBlobsAndCommits(nblobs)
@@ -74,4 +74,4 @@ suite "verify proof (high-level)":
     doAssert not proofOpt.isNone()
     var proof = proofOpt.get()
     proof.z.l[0]=1
-    doAssert not verify_aggregate_kzg_proof(blobs, commits, proof)
+    doAssert not verify_aggregate_kzg_proof_points(blobs, commits, proof)

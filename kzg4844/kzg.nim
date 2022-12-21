@@ -5,6 +5,8 @@ import
 export
   results
 
+export kzg_abi.blob_t
+
 var
   settings: KZGSettings
   settings_init: bool

@@ -7,7 +7,11 @@
 # This file may not be copied, modified, or distributed except according to
 # those terms.
 
-import std/strformat
+import
+  std/strformat,
+  strutils
+
+from os import DirSep
 
 const FIELD_ELEMENTS_PER_BLOB*{.strdefine.} = 4096
 
@@ -15,7 +19,8 @@ const FIELD_ELEMENTS_PER_BLOB*{.strdefine.} = 4096
 {.compile: "../vendor/c-kzg-4844/blst/src/server.c"}
 {.compile: "../vendor/c-kzg-4844/src/c_kzg_4844.c"}
 
-{.passc: "-I/Users/henridf/work/nim-kzg-4844/vendor/c-kzg-4844/blst/bindings -DFIELD_ELEMENTS_PER_BLOB=" & fmt"{FIELD_ELEMENTS_PER_BLOB}".}
+const bindingsPath = currentSourcePath.rsplit(DirSep, 1)[0] & "/../vendor/c-kzg-4844/blst/bindings"
+{.passc: "-I" & bindingsPath & " -DFIELD_ELEMENTS_PER_BLOB=" & fmt"{FIELD_ELEMENTS_PER_BLOB}".}
 
 
 

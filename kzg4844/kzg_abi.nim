@@ -17,6 +17,7 @@ const FIELD_ELEMENTS_PER_BLOB*{.strdefine.} = 4096
 
 {.compile: "../vendor/c-kzg-4844/blst/build/assembly.S".}
 {.compile: "../vendor/c-kzg-4844/blst/src/server.c"}
+{.compile: "../vendor/c-kzg-4844/src/sha256.c"}
 {.compile: "../vendor/c-kzg-4844/src/c_kzg_4844.c"}
 
 const bindingsPath = currentSourcePath.rsplit(DirSep, 1)[0] & "/../vendor/c-kzg-4844/blst/bindings"

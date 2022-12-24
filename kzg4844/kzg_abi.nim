@@ -15,8 +15,8 @@ from os import DirSep
 
 const FIELD_ELEMENTS_PER_BLOB*{.strdefine.} = 4096
 
-{.compile: "../vendor/c-kzg-4844/blst/build/assembly.S".}
-{.compile: "../vendor/c-kzg-4844/blst/src/server.c"}
+when not defined(externalBlst): {.compile: "../vendor/c-kzg-4844/blst/build/assembly.S".}
+when not defined(externalBlst): {.compile: "../vendor/c-kzg-4844/blst/src/server.c"}
 {.compile: "../vendor/c-kzg-4844/src/sha256.c"}
 {.compile: "../vendor/c-kzg-4844/src/c_kzg_4844.c"}
 

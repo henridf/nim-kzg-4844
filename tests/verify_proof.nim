@@ -39,20 +39,21 @@ suite "verify proof (abi)":
   test "verify proof success":
     var (blobs, commits) = createBlobsAndCommits(nblobs)
     var kp: KZGProof
-    doAssert compute_aggregate_kzg_proof(kp, addr(blobs[0]), csize_t(nblobs), settings) == C_KZG_OK
+    doAssert compute_aggregate_kzg_proof(addr(kp[0]), addr(blobs[0]), csize_t(nblobs), settings) == C_KZG_OK
 
     var ok: bool
-    doAssert verify_aggregate_kzg_proof(addr(ok), addr(blobs[0]), addr(commits[0]), csize_t(nblobs), kp, settings) == C_KZG_OK
+    doAssert verify_aggregate_kzg_proof(addr(ok), addr(blobs[0]), addr(commits[0]), csize_t(nblobs), addr(kp[0]), settings) == C_KZG_OK
     doAssert ok
 
   test "verify proof failure":
     var (blobs, commits) = createBlobsAndCommits(nblobs)
     var kp: KZGProof
-    doAssert compute_aggregate_kzg_proof(kp, addr(blobs[0]), csize_t(nblobs), settings) == C_KZG_OK
+    doAssert compute_aggregate_kzg_proof(addr(kp[0]), addr(blobs[0]), csize_t(nblobs), settings) == C_KZG_OK
+    var (otherblobs, othercommits) = createBlobsAndCommits(nblobs)
+    doAssert compute_aggregate_kzg_proof(addr(kp[0]), addr(otherblobs[0]), csize_t(nblobs), settings) == C_KZG_OK
 
-    kp.x.l[0]=1
     var ok: bool
-    doAssert verify_aggregate_kzg_proof(addr(ok), addr(blobs[0]), addr(commits[0]), csize_t(nblobs), kp, settings) == C_KZG_OK
+    doAssert verify_aggregate_kzg_proof(addr(ok), addr(blobs[0]), addr(commits[0]), csize_t(nblobs), addr(kp[0]), settings) == C_KZG_OK
     doAssert not ok
 
 suite "verify proof (high-level)":
@@ -66,12 +67,15 @@ suite "verify proof (high-level)":
     doAssert not proofOpt.isNone()
     let proof = proofOpt.get()
 
-    doAssert verify_aggregate_kzg_proof_points(blobs, commits, proof)
+    doAssert verify_aggregate_kzg_proof(blobs, commits, proof)
 
   test "verify proof failure":
     var (blobs, commits) = createBlobsAndCommits(nblobs)
-    let proofOpt = compute_aggregate_kzg_proof(blobs)
-    doAssert not proofOpt.isNone()
-    var proof = proofOpt.get()
-    proof.z.l[0]=1
-    doAssert not verify_aggregate_kzg_proof_points(blobs, commits, proof)
+    doAssert not compute_aggregate_kzg_proof(blobs).isNone()
+
+    var (otherBlobs, _) = createBlobsAndCommits(nblobs)
+    let badProofOpt = compute_aggregate_kzg_proof(otherBlobs)
+    doAssert not badProofOpt.isNone()
+    var badProof = badProofOpt.get()
+
+    doAssert not verify_aggregate_kzg_proof(blobs, commits, badProof)

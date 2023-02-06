@@ -17,7 +17,6 @@ const FIELD_ELEMENTS_PER_BLOB*{.strdefine.} = 4096
 
 when not defined(externalBlst): {.compile: "../vendor/c-kzg-4844/blst/build/assembly.S".}
 when not defined(externalBlst): {.compile: "../vendor/c-kzg-4844/blst/src/server.c"}
-{.compile: "../vendor/c-kzg-4844/src/sha256.c"}
 {.compile: "../vendor/c-kzg-4844/src/c_kzg_4844.c"}
 
 const bindingsPath = currentSourcePath.rsplit(DirSep, 1)[0] & "/../vendor/c-kzg-4844/blst/bindings"
@@ -27,6 +26,9 @@ const bindingsPath = currentSourcePath.rsplit(DirSep, 1)[0] & "/../vendor/c-kzg-
 
 const
   BYTES_PER_FIELD_ELEMENT* = 32
+  BYTES_PER_COMMITMENT* = 48
+  BYTES_PER_PROOF* = 48
+
 
 type C_KZG_RET* = cint
 const
@@ -59,13 +61,8 @@ type
 
   g1_t* = blst_p1
 
-  KZGCommitment* = g1_t
-  KZGProof* = g1_t
-
-  # temporary pending c-kzg upgrade
-  KZGCommitmentBytes* = array[48, byte]
-  KZGProofBytes* = array[48, byte]
-
+  KZGCommitment* = array[BYTES_PER_COMMITMENT, uint8]
+  KZGProof* = array[BYTES_PER_PROOF, uint8]
 
   FFTSettings {.byref.} = object
     max_width: uint64
@@ -87,8 +84,8 @@ proc load_trusted_setup_file*(ks: var KZGSettings, inf: File): C_KZG_RET {.cdecl
 
 proc blob_to_kzg_commitment*(kc: var KZGCommitment, blob: blob_t, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "blob_to_kzg_commitment".}
 
-proc compute_aggregate_kzg_proof*(kp: var KZGProof, blobs: ptr blob_t, n: csize_t, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "compute_aggregate_kzg_proof".}
+proc compute_aggregate_kzg_proof*(kp: ptr uint8, blobs: ptr blob_t, n: csize_t, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "compute_aggregate_kzg_proof".}
 
-proc verify_aggregate_kzg_proof*(ok: ptr bool, blobs: ptr blob_t, expected_kzg_commitments: ptr KZGCommitment, n: csize_t, proof: KZGProof, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "verify_aggregate_kzg_proof".}
+proc verify_aggregate_kzg_proof*(ok: ptr bool, blobs: ptr blob_t, expected_kzg_commitments: ptr KZGCommitment, n: csize_t, proof: ptr uint8, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "verify_aggregate_kzg_proof".}
 
 proc verify_kzg_proof*(ok: ptr bool, kc: KZGCommitment, z: array[32, uint8], y: array[32, uint8], proof: KZGProof, s: KZGSettings): C_KZG_RET  {.cdecl, importc: "verify_kzg_proof".}
